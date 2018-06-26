@@ -1,4 +1,5 @@
 import py2neo
+
 import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
@@ -25,5 +26,14 @@ def get_block_data(first_block, last_block):
                     """.format(first_block, last_block)
     return query_string
 
+def write_to_csv(result,string):
+
+    df = result.to_data_frame()
+
+    if (df.empty):
+        print("Something went wrong, there is no data for this/these blocks")
+    else:
+
+        df.to_csv('{}.csv'.format(string), encoding='utf-8', index=False)
 
 
