@@ -1,10 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="b85a80aa-b6e6-4596-afa1-63dcabc86be7" name="Default" comment="">
-      <change beforePath="$PROJECT_DIR$/.ipynb_checkpoints/exploration-checkpoint.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/.ipynb_checkpoints/exploration-checkpoint.ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/exploration.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/exploration.ipynb" afterDir="false" />
-    </list>
+    <list default="true" id="b85a80aa-b6e6-4596-afa1-63dcabc86be7" name="Default" comment="" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -20,7 +17,7 @@
       <file leaf-file-name="main.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/main.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-290">
+            <state relative-caret-position="153">
               <caret line="13" selection-start-line="13" selection-end-line="13" />
             </state>
           </provider>
@@ -349,7 +346,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/main.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-290">
+        <state relative-caret-position="153">
           <caret line="13" selection-start-line="13" selection-end-line="13" />
         </state>
       </provider>
