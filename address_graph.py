@@ -27,6 +27,7 @@ def get_block_data(first_block, last_block):
                     MATCH (oadr:Address) <-[:LOCK]- (txo_out:TxOut) <-[:OUT]- (t)
 
                     RETURN iadr.address as iadr, oadr.address as oadr, txo_in.value as input_val, txo_out.value as output_val, ID(txo_in) as id_txo_in, ID(txi) as id_txi, ID(t) as id_t, ID(txo_out) as id_txo_out
+                    LIMIT 50
                     """.format(first_block, last_block)
     return query_string
 
@@ -70,7 +71,7 @@ def address_graph(result):
     drawer = TextDrawer(context, text=title, halign=TextDrawer.CENTER)
     drawer.draw_at(x=1745, y=100, width=600)
     p.save(fileName)
-    ig.savegml('filename')
+    ig.write_gml('./filename')
 
 
 result = query_database(get_block_data(400000,400000))
