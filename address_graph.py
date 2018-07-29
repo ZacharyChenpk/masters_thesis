@@ -1,5 +1,6 @@
 import igraph
 import py2neo
+import pickle
 
 import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -20,14 +21,19 @@ def get_block_data(first_block, last_block):
                     """.format(first_block, last_block)
     return query_string
 
-def address_graph(result):
+def address_graph(result,dic):
     tups1 = []
     for d in result:
         tups1.append((d['iadr'],d['oadr']))
+    ig = igraph.Graph.TupleList(tups1,directed=True,vertex_name_attr='addr')
+    for k in ig.vs:
+        print(k)
+        # if k in dic.keys():
+        #     ig.es[0]["is_formal"] = True
+        #     k['addr'] = dic[k]
 
-    ig = igraph.Graph.TupleList(tups1,directed=True)
-    ig.write_graphml('./400000_addr.graphml')
 
-
+with open('service_dic.pickle', 'rb') as handle:
+    dic = pickle.load(handle)
 result = query_database(get_block_data(400000,400000))
-address_graph(result)
+address_graph(result,dic)
