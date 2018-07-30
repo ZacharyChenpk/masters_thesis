@@ -21,19 +21,30 @@ def get_block_data(first_block, last_block):
                     """.format(first_block, last_block)
     return query_string
 
-def address_graph(result,dic):
+def address_graph(result,dic,users):
     tups1 = []
     for d in result:
         tups1.append((d['iadr'],d['oadr']))
-    ig = igraph.Graph.TupleList(tups1,directed=True,vertex_name_attr='addr')
-    for k in ig.vs:
-        print(k)
-        # if k in dic.keys():
-        #     ig.es[0]["is_formal"] = True
-        #     k['addr'] = dic[k]
+    ag = igraph.Graph.TupleList(tups1,directed=True,vertex_name_attr='addr')
+
+    for i,k in enumerate(ag.vs):
+    a = ag.vs[i]["addr"]
+    assigned = False
+    if a in dic.keys():
+        ag.vs[i]["service"] = dic[a]
+    for j, user in enumerate(users):
+        if a in user.adr or a in user.cadr:
+            ag.vs[i]["user"] = j
+            assigned = True
+    if not assigned:
+        ag.vs[i]["user"] = a
 
 
-with open('service_dic.pickle', 'rb') as handle:
+    ag.write_graphml('./400000_addr_labelled.graphml')
+
+with open('./pickles/service_dic.pickle', 'rb') as handle:
     dic = pickle.load(handle)
+with open('./pickles/users.pickle', 'rb') as handle:
+    users = pickle.load(handle)
 result = query_database(get_block_data(400000,400000))
-address_graph(result,dic)
+address_graph(result,dic,users)
