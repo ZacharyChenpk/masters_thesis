@@ -197,10 +197,6 @@ def check_adrs_txs(users):
         for ad in user.cadr:
             cadrs.append(ad)
 
-    # cads = []
-    # for i,user in enumerate(users):
-    #     for cad in user.cadr:
-    #         cads.append(cad)
     try:
         if Counter(tx_ids).most_common(10)[0][1] == 1:  ##Repeated txids between bitcoin and the miners
             print("No repeats txid")
@@ -208,10 +204,11 @@ def check_adrs_txs(users):
         if Counter(ads).most_common(10)[0][1] == 1:
             print("No repeats ads")
 
-        if Counter(cads).most_common(10)[0][1] == 1:
+        if Counter(cadrs).most_common(10)[0][1] == 1:
             print("No repeats cadrs")
     except:
         pass
+
 def construct_user_graph(df, users):
     #Construct User Graph
     df['input_user'] = df['iadr']
@@ -309,6 +306,8 @@ def get_user_features_df(df, users):
     user_df['is_miner'].fillna(False, inplace=True)
     user_df.is_miner = user_df.is_miner.apply(lambda x: 1 if x == True else 0)
 
+    #user_df["category"] = "unknown"
+
     user_total_sent = [(user,total_rec) for (user, total_rec) in user_df['total_sent'].iteritems()]
     user_df = user_df.sort_index()
 
@@ -327,7 +326,7 @@ def get_user_features_df(df, users):
 
     return user_df
 
-def tag_users(users, user_df, df, i):
+def tag_users(users, user_df, df):
     #Dictionary structure -
     #'Address': 'Category'
     categories = ['exchanges','gambling','pool']
@@ -350,17 +349,19 @@ def tag_users(users, user_df, df, i):
         for key in dic_userlabels:
             if key in user.adr:
                 cat = dic_userlabels[key]
-                if(len(cat)>1):
-                    with open('./out.txt', 'a') as f:
-                        print("problem occured at {}".format(i), file=f)
-                else:
-                    user_df.loc[i, 'category'] = list(cat)[0] #label[cat.pop()]
-                    labels.add(list(cat)[0])
-        if labels:
+                labels.add(list(cat)[0])
+        if len(labels)==1:
+            user_df.loc[i, 'category'] = list(cat)[0] #label[cat.pop()]
             user_label[i].update(labels)
+        elif len(labels)>1:
+            user_df.loc[i, 'category'] = 'mixed'
+            with open('./out.txt', 'a') as f:
+                print("user had multi tags {}".format(i), file=f)
+
     user_df = user_df.dropna(axis=0,how='any')
 
     if 'category' not in user_df.columns:
+        print('tatti')
         user_df = user_df.iloc[0:0]
 
     return user_df, user_label, dic_userlabels
