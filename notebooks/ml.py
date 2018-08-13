@@ -1,5 +1,6 @@
 import pydot
 import numpy as np
+import pandas as pd
 
 import seaborn as sns
 sns.set(style="whitegrid", color_codes=True)
@@ -11,6 +12,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
 from sklearn.neighbors import KNeighborsClassifier
+from sklearn.model_selection import GridSearchCV
 
 
 def plot_confusion_matrix(y_true, y_pred, filename):
@@ -21,7 +23,7 @@ def plot_confusion_matrix(y_true, y_pred, filename):
     plt.xlabel('predicted label')
     plt.savefig(filename+".pdf")
     plt.figure()
-    mat_normalized = mat / mat.sum(axis=1)
+    mat_normalized = mat.astype('float') / mat.sum(axis=1)[:, np.newaxis]
     sns.heatmap(mat_normalized, fmt="f", square=True, annot=True, cmap="YlGnBu", cbar=True)
     plt.ylabel('true label'),
     plt.xlabel('predicted label')
@@ -39,11 +41,25 @@ def get_best_dec_tree(X_train,y_train,X_test, y_test):
         if acc_score > best_acc:
             best_acc = acc_score
             best_depth = i
-    dec_tree = tree.DecisionTreeClassifier(max_depth = best_depth, random_state=42)
+    print(best_depth)
+    dec_tree = tree.DecisionTreeClassifier(max_depth = best_depth, random_state=42,  class_weight="balanced")
     dec_tree.fit(X_train, y_train)
     y_pred = dec_tree.predict(X_test)
     print("the accuracy = " + str(accuracy_score(y_test, y_pred)))
     return dec_tree, y_pred
+
+def get_best_estimator_params(estimator, param_grid, X,Y):
+    grid = GridSearchCV(estimator, param_grid, cv=10, scoring='accuracy', return_train_score=False, n_jobs = -1)
+    grid.fit(X, Y)
+    #df = pd.DataFrame(grid.cv_results_)[['mean_test_score', 'std_test_score', 'params']]
+    grid_mean_scores = grid.cv_results_['mean_test_score']
+    # plot the results
+    plt.plot(param_grid[list(param_grid.keys())[0]], grid_mean_scores)
+    plt.xlabel('Parameter')
+    plt.ylabel('Cross-Validated Accuracy')
+
+    return grid.best_params_
+
 
 def plot_dec_tree(decision_tree, feature_names, filename):
     dot_data = tree.export_graphviz(decision_tree, out_file=None,
@@ -64,14 +80,14 @@ def get_best_random_forest(X_train,y_train,X_test, y_test):
     best_acc = 0
     best_depth = 0
     for i in range(3,40):
-        rf = RandomForestClassifier(max_depth=i, random_state=42)
+        rf = RandomForestClassifier(max_depth=i, random_state=42, class_weight="balanced")
         rf.fit(X_train, y_train)
         y_pred = rf.predict(X_test)
         acc_score = accuracy_score(y_test, y_pred)
         if acc_score > best_acc:
             best_acc = acc_score
             best_depth = i
-    rf = RandomForestClassifier(max_depth=best_depth, random_state=42)
+    rf = RandomForestClassifier(max_depth=best_depth, random_state=42,  class_weight="balanced")
     rf.fit(X_train, y_train)
     y_pred = rf.predict(X_test)
     print("accuracy = " + str(accuracy_score(y_test, y_pred)))
@@ -80,7 +96,9 @@ def get_best_random_forest(X_train,y_train,X_test, y_test):
 def pca_and_plot(X_train, y_train):
     pca = PCA(n_components=2)
     principalComponents = pca.fit_transform(X_train)
-    y_df = pd.DataFrame(data = y_train, columns=["category"])
+    y_df = y_train.to_frame()
+    y_df = y_df.reset_index()
+    y_df = y_df.drop(columns=['user'])
     principalDf = pd.DataFrame(data = principalComponents, columns = ['principal component 1', 'principal component 2'])
     finalDf = pd.concat([principalDf, y_df], axis=1)
     # 2d plot:
@@ -89,28 +107,26 @@ def pca_and_plot(X_train, y_train):
     ax.set_xlabel('Principal Component 1')
     ax.set_ylabel('Principal Component 2')
     ax.set_title('2 component PCA')
-    targets = [0,1]
-    colors = ['gray', '#127161']
-    markers = ['^','o']
+    targets = ['exchanges','gambling','pool']
+    colors = ['gray', 'red','blue']
+    markers = ['^','o','s']
+    tar = {'exchanges':0,'gambling':1,'pool':2}
     for target, color in zip(targets,colors):
         indicesToKeep = finalDf['category'] == target
         ax.scatter(finalDf.loc[indicesToKeep, 'principal component 1']
                    , finalDf.loc[indicesToKeep, 'principal component 2']
                    , c = color
-                   , marker=markers[target]
+                   , marker=markers[tar[target]]
                    , s = 40)
     ax.legend(targets)
     ax.grid()
 
-def normalize(X_train, X_test):
+def normalize(X):
     # have to scale the data s.t. the relative variance can be distinguished for PCA
-    X_train_min_max = MinMaxScaler().fit_transform(X_train)
-    X_test_min_max  = MinMaxScaler().fit_transform(X_test)
+    X_min_max = MinMaxScaler().fit_transform(X)
+    X_standard = StandardScaler().fit_transform(X)
 
-    X_train_standard = StandardScaler().fit_transform(X_train)
-    X_test_standard  = StandardScaler().fit_transform(X_test)
-
-    return X_train_min_max, X_test_min_max, X_train_standard, X_test_standard
+    return X_min_max, X_standard
 
 def get_best_pca_components(X_train, X_test, y_train, y_test):
     best_acc = 0
