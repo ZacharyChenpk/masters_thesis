@@ -306,7 +306,7 @@ def get_user_features_df(df, users):
     user_df['is_miner'].fillna(False, inplace=True)
     user_df.is_miner = user_df.is_miner.apply(lambda x: 1 if x == True else 0)
 
-    user_df["category"] = "unknown"
+    #user_df["category"] = "unknown"
 
     user_total_sent = [(user,total_rec) for (user, total_rec) in user_df['total_sent'].iteritems()]
     user_df = user_df.sort_index()
@@ -329,7 +329,7 @@ def get_user_features_df(df, users):
 def tag_users(users, user_df, df):
     #Dictionary structure -
     #'Address': 'Category'
-    categories = ['exchanges','gambling','pool']
+    categories = ['exchanges','gambling','pool','mixer']
     dic_userlabels = defaultdict(set)
     starttime = time.time()
 
@@ -358,7 +358,7 @@ def tag_users(users, user_df, df):
             with open('./out.txt', 'a') as f:
                 print("user had multi tags {}".format(i), file=f)
 
-    user_df = user_df.dropna(axis=0,how='any')
+    #user_df = user_df.dropna(axis=0,how='any')
 
     if 'category' not in user_df.columns:
         print('tatti')

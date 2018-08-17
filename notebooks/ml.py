@@ -167,3 +167,8 @@ def class_hist(df):
     ax.set_xticklabels(x)
     ax.set_ylabel('Number of users')
     ax.set_title('Distribution of classes')
+
+def feature_plot(features, importances):
+    indices = np.argsort(importances)
+    cols = [features[i] for i in indices]
+    pd.Series(importances[indices], index=cols).plot.bar(color='steelblue', figsize=(12, 6))
