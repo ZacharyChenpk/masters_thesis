@@ -1,4 +1,4 @@
-# masters_thesis
+# Detecting users on the Bitcoin network using Machine Learning
 
 This project uses graph databases, machine learning and graph theory to provide a quantitative insight and visual analytics into transactional behaviour on the bitcoin network. This supplements previous work done at the Imperial College London Data Science Institute: https://www.youtube.com/watch?v=E-sQ-UkvH2w&t=3s
 
